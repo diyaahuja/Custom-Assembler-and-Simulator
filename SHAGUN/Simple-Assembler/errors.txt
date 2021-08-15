@@ -1,1 +1,0 @@
-Variables not declared at the beginninghlt not being used as the last instruction

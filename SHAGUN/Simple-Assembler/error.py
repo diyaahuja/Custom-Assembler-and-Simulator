@@ -68,14 +68,14 @@ def check_type(x):
     else:
         return "none"
 #this is error dictionary
-errors={ 1 : "Typos in instruction name or label name in line {}", 2: "Use of undefined variables in line {}",
- 3: "Use of undefined labels in line {}", 4:"Illegal use of FLAGS register in line{}",
- 5: "Illegal Immediate values (less than 0 or more than 255) in line {}",
- 6: "Variables not declared at the beginning",7: "hlt not being used as the last instruction",
- 8: "Missing hlt instruction",9: "Wrong syntax used in instruction in line {}",
- 10:"Variable name is not valid (must be alphabet or number) in line {}",
- 11: "Variable used already initialised in memory {}",12: "immediate value should be an integer in line {}",
- 12: "Variable name used instead of label name in line {}", 13: "Label name used instead of variable name in line {}"
+errors={ 1 : "[ERROR] : Typos in instruction name or label name in line {}", 2: "[ERROR] : Use of undefined variable in line {}",
+ 3: "[ERROR] : Use of undefined labels in line {}", 4:"[ERROR] : Illegal use of FLAGS register in line{}",
+ 5: "[ERROR] : Illegal Immediate values (less than 0 or more than 255) in line {}",
+ 6: "[ERROR] : Variables not declared at the beginning",7: "[ERROR] : hlt not being used as the last instruction",
+ 8: "[ERROR] : Missing hlt instruction",9: "[ERROR] : General Syntax Error in instruction in line {}",
+ 10:"[ERROR] : Variable name is not valid (must be alphabet or number) in line {}",
+ 11: "[ERROR] : Variable used already initialised in memory {}",12: "[ERROR] : immediate value should be an integer in line {}",
+ 12: "[ERROR] : Variable name used instead of label name in line {}", 13: "[ERROR] : Label name used instead of variable name in line {}"
        } # add more errors here 
 
 
@@ -112,15 +112,15 @@ def check_line(line): #returns line no of an instruction in the original code
 
 def check_typos(instruction_code):
  # gives the type of instruction, input arg is in form of array of strings of each line
-
+    global error_flag_2
     type=check_type(instruction_code)
     m1=type.split()
     if(m1[0]=="label"):
         a= check_typos(instruction_code[1:])
         return a
-    error_flag_1=check_instruction(instruction_code)
+    error_flag_2 =check_instruction(instruction_code)
     line_no=check_line(instruction_code)
-    if(error_flag_1):
+    if(error_flag_2):
         return True
     else:
         return False
@@ -170,6 +170,7 @@ def check_typos(instruction_code):
 
 def check_syntax(instruction_code):
     type=check_type(instruction_code)
+    global error_flag_2
     m1=type.split()
     if(m1[0]=="label"):
         a= check_syntax(instruction_code[1:])
@@ -180,7 +181,7 @@ def check_syntax(instruction_code):
             return(error_flag_2)
         elif(not(instruction_code[1] in valid_register_names) or not(instruction_code[2] in valid_register_names) or not(instruction_code[3] in valid_register_names)):
             error_flag_2=True
-            print("Typos in register name")
+            print("[ERROR] : Typos in register name")
             return(error_flag_2)
     elif(type=="B"):
         if(len(instruction_code)!=3):
@@ -188,7 +189,7 @@ def check_syntax(instruction_code):
             return(error_flag_2)
         elif((instruction_code[1] not in valid_register_names) or str((instruction_code[2] )).find("$")!=0):
             error_flag_2=True
-            print("Typos in register name")
+            print("[ERROR] : Typos in register name")
             return(error_flag_2)
     elif(type=="C"):
         if(len(instruction_code)!=3):
@@ -196,7 +197,7 @@ def check_syntax(instruction_code):
             return(error_flag_2)
         elif(not(instruction_code[1] in valid_register_names) or not(instruction_code[2] in valid_register_names) ):
             error_flag_2=True
-            print("Typos in register name")
+            print("[ERROR] : Typos in register name")
             return(error_flag_2)
     elif(type=="D"):
         if(len(instruction_code)!=3):
@@ -204,7 +205,7 @@ def check_syntax(instruction_code):
             return(error_flag_2)
         elif(not(instruction_code[1] in valid_register_names)):
             error_flag_2=True
-            print("Typos in register name")
+            print("[ERROR] : Typos in register name")
             return(error_flag_2)
     elif(type=="E"):
         if(len(instruction_code)!=2):
@@ -212,7 +213,7 @@ def check_syntax(instruction_code):
             return(error_flag_2)
         elif(not(instruction_code[1] in label_names) ):
             error_flag_2=True
-            print("Typos in register name")
+            print("[ERROR] : Typos in register name")
             return(error_flag_2)
     elif(type=="F"):
         if(instruction_code!=["hlt"]):
@@ -328,7 +329,12 @@ def check_variable_label(line):
 """ this function checks all the possible errors"""
 def checkerrors(line):    
                   # this function checks all the errors mentioned in pdf from 1 to 5 
-    line_no=check_line(instruction_code)  
+    line_no=check_line(instruction_code) 
+    if check_syntax(line):
+        print(errors[9].format(line_no))
+        file_object.write(errors[9].format(line_no))
+        error_flag_2=True
+        return error_flag_2 
     if check_typos(line):
         print(errors[1].format(line_no))
         file_object.write(errors[1].format(line_no))
@@ -353,34 +359,30 @@ def checkerrors(line):
         print(errors[3].format(line_no))
         file_object.write(errors[3].format(line_no))
         error_flag_2=True
-        return
+        return error_flag_2
     if check_wrong_use_of_flags_register(line):
         print(errors[4].format(line_no))
         file_object.write(errors[4].format(line_no))
         error_flag_2=True
-        return
+        return error_flag_2
     
     if check_imm(line):
         print(errors[12].format(line_no))
         file_object.write(errors[12].format(line_no))
         error_flag_2=True
-        return
+        return error_flag_2
 
     if check_wrong_immediate_value(line):
         print(errors[5].format(line_no))
         file_object.write(errors[5].format(line_no))
         error_flag_2=True
-        return
-    if check_syntax(line):
-        print(errors[9].format(line_no))
-        file_object.write(errors[9].format(line_no))
-        error_flag_2=True
-        return
+        return error_flag_2
+    
     if check_valid_variable(line):
         print(errors[10].format(line_no))
         file_object.write(errors[10].format(line_no))
         error_flag_2=True
-        return
+        return error_flag_2
 
     #add more remaining errors here
 
@@ -404,8 +406,8 @@ Data_original=[Line for Line in lines]
 Data = [Line for Line in lines if Line.strip() ] 
 
 if(len(Data))>256:
-    print("The assembler can write less than or equal to 256 lines.")
-    file_object.write("The assembler can write less than or equal to 256 lines.")
+    print("[ERROR] : The assembler can write less than or equal to 256 lines.")
+    file_object.write("[ERROR] : The assembler can write less than or equal to 256 lines.")
 
 for x in Data_original:
     x=x.split()
@@ -422,18 +424,27 @@ for x in Data:
     if(check_type(instruction_code)=="variable"):
         if len(instruction_code)>=2 :
             if instruction_code[1] in variable_names:
-                print("Wrong syntax in line "+str(check_line(instruction_code))+" used variable "+instruction_code[1]+" already")
+                print("[ERROR] : Ambiguity in line "+str(check_line(instruction_code))+", you have declared variable "+instruction_code[1]+" already")
                 error_flag_2=True
+                #sys.exit()
+                break
+
             variable_names.append(instruction_code[1])
             mem_add_var.append(instruction_code)
+        else:
+            print("[ERROR] :  Wrong variable declaration syntax used ")
+            error_flag_2=True
+            sys.exit()
 
     if(check_type(instruction_code)!="variable"):
         mem_addr.append(instruction_code)
         if(check_type(instruction_code)=="label"):
             if(instruction_code[0].replace(":","")in label_names):
                 if instruction_code[0].replace(":","") not in mem_addr[mem_addr.index(instruction_code)-1]:
-                 print("Wrong syntax in line "+ str(check_line(instruction_code))+" used "+instruction_code[0].replace(":","")+ " already")
+                 print("[ERROR] : Ambiguity in line "+ str(check_line(instruction_code))+", you have used "+instruction_code[0].replace(":","")+ " already")
                  error_flag_2=True
+                 sys.exit()
+                 break
                 #checks if label is declared twice
                 
             label_names.append(instruction_code[0].replace(":",""))
@@ -460,6 +471,8 @@ for instruction in Data_updated:
         error_flag_2=True
         print(errors[6])
         file_object.write(errors[6])
+        sys.exit()
+        
 
 #checks if hlt instruction is misplaced
 def check_type1(line):
@@ -472,11 +485,13 @@ def check_type1(line):
 
 
 #Data_updated stores the updated instructions after removing all empty lines and white spaces  
-error_flag_2=False
+
 for instruction_code in Data_updated:
-    checkerrors(instruction_code)
-    if error_flag_2==True:
-        quit()
+    
+    if checkerrors(instruction_code):
+        error_flag_2=True
+        sys.exit()
+        
 
 found=False
 for instruction in range(len(Data_updated)):
@@ -487,11 +502,17 @@ for instruction in range(len(Data_updated)):
             error_flag_2=True
             print(errors[7])
             file_object.write(errors[7])
+            sys.exit()
+            
+            
 #checks whether hlt instruction is missing
 if found==False:
     error_flag_2=True
     print(errors[8])
     file_object.write(errors[8])
+    sys.exit()
+    #sys.exit()
    # print("line no "+ str(check_line(instruction_code))+" is verified")
     #this print statement is just to see if my part works, you can delete it 
  #end of error program
+
