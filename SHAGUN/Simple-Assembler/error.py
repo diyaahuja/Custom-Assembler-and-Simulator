@@ -443,7 +443,7 @@ for x in Data:
                 if instruction_code[0].replace(":","") not in mem_addr[mem_addr.index(instruction_code)-1]:
                  print("[ERROR] : Ambiguity in line "+ str(check_line(instruction_code))+", you have used "+instruction_code[0].replace(":","")+ " already")
                  error_flag_2=True
-                 sys.exit()
+                 #sys.exit()
                  break
                 #checks if label is declared twice
                 

@@ -1,4 +1,10 @@
+"""
+Made By -
+Shagun Mohta    : 2020468
+Diya Ahuja      : 2020431
+Hitesh Bhandari : 2020436
 
+"""
 from error import *
 #2nd pass
 Bin_reg = {"R0":"000", "R1":"001", "R2":"010", "R3":"011", "R4": "100", "R5": "101", "R6":"111","FLAGS":"111"}
