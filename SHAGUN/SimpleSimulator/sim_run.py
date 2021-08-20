@@ -136,7 +136,25 @@ def execute_instruction(instruction,type):
             #print(Registers)
 
     elif type=="C":
-        1
+        a=int(Registers[instruction[1]],2)
+        b=int(Registers[instruction[2]],2)
+        if instruction[0]=="div":
+            c = a/b
+            d = a%b
+            Registers["R0"] = format(c, '08b')
+            Registers["R1"] = format(d, '08b')
+
+        elif instruction[0]=="not":
+            c = ~b
+            c = format(c, '08b')
+            Registers[instruction[1]] = c
+        elif instruction[0]=="cmp":
+            1
+            if a==b:
+                1
+        elif instruction[0]=="mov":
+            Registers[instruction[1]] = Registers[instruction[2]]
+
     elif type=="D":
         1
     elif type=="E":
