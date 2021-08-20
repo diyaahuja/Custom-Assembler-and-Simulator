@@ -1,6 +1,6 @@
 
 
-Bin_reg = {"R0":"000", "R1":"001", "R2":"010", "R3":"011", "R4": "100", "R5": "101", "R6":"111","FLAGS":"111"}  
+Bin_reg = {"R0":"000", "R1":"001", "R2":"010", "R3":"011", "R4": "100", "R5": "101", "R6":"110","FLAGS":"111"}  
 valid_label_names=["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","_","1","2","3","4","5","6","7","8","9","0",":"]
 
 type_A={"add":"00000","sub": "00001","mul":"00110","xor":"01010","or":"01011","and":"01100"}
@@ -12,11 +12,37 @@ error_flag_2=False
 label_names=[]
 variable_names=[]
 mem_add=[None]*256
+Registers = {"R0":"0000000000000000", "R1":"0000000000000000", "R2":"0000000000000000", "R3":"0000000000000000",
+ "R4": "0000000000000000", "R5": "0000000000000000", "R6":"0000000000000000","FLAGS":"0000000000000000"}
 
 Halted=False
 i=0
 k=1
 pc=0 #program counter
+
+def Immediate(n):
+    n=int(n)
+    Bin=""
+    while n:
+        Bin=str(n%2)+Bin
+        n=n//2
+    if len(Bin)>16:
+        return Bin[len(Bin)-16:]
+    while len(Bin)<16:
+        Bin="0"+Bin
+    return Bin
+
+def left_shift(bin,imm):
+    shift=str("0"*int(imm))
+    bin=bin+shift
+    bin=bin[int(imm):]
+    return bin
+
+def right_shift(bin,imm):
+    shift=str("0"*int(imm))
+    bin=shift+bin
+    bin=bin[0:16]
+    return bin
 
 def findregister(register): #finds  register 
     for key, value in Bin_reg.items():
@@ -58,13 +84,57 @@ def fetch_instruction(type,inst_name,bin_inst,i):
 
 
 def execute_instruction(instruction,type):
+    instruction=instruction.split(" ")
 
 #add your codes here
 
-    if type=="A":  
-        1
+    if type=="A": 
+        a=int(Registers[instruction[2]],2)
+        b=int(Registers[instruction[3]],2)
+
+        if instruction[0]=="add":
+            c=a+b
+            if c>65535:
+                Registers[instruction[1]]=Immediate(c)
+                Registers["FLAGS"]=Registers["FLAGS"][0:12]+"1"+Registers["FLAGS"][13:]
+            else:
+                Registers[instruction[1]]=Immediate(c)
+            #print(Registers)
+                
+        elif instruction[0]=="sub":
+            c=a-b
+            if c>=0:
+                Registers[instruction[1]]=Immediate(c)
+            else:
+                Registers[instruction[1]]="00000000"
+                Registers["FLAGS"]=Registers["FLAGS"][0:12]+"1"+Registers["FLAGS"][13:]
+            #print(Registers)
+        elif instruction[0]=="mul":
+            c=a*b
+            if c>65535:
+                Registers[instruction[1]]=Immediate(c)
+                Registers["FLAGS"]=Registers["FLAGS"][0:12]+"1"+Registers["FLAGS"][13:]
+            else:
+                Registers[instruction[1]]=Immediate(c)
+            #print(Registers)
+        elif instruction[0]=="xor":
+            Registers[instruction[1]]=Immediate(a^b)
+        elif instruction[0]=="or":
+            Registers[instruction[1]]=Immediate(a|b)
+        elif instruction[0]=="and":
+            Registers[instruction[1]]=Immediate(a&b)
+
     elif type=="B":
-        1
+        if instruction[0]=="mov":
+            Registers[instruction[1]]=Immediate(instruction[2])
+            #print(Registers)
+        elif instruction[0]=="ls":
+            Registers[instruction[1]]=left_shift(Registers[instruction[1]],instruction[2])
+            #print(Registers)
+        elif instruction[0]=="rs":
+            Registers[instruction[1]]=right_shift(Registers[instruction[1]],instruction[2])
+            #print(Registers)
+
     elif type=="C":
         1
     elif type=="D":
@@ -120,5 +190,8 @@ for i in mem_add:
         instruction=i[0]
         if len(i)>1:
             type=i[1]
-    #print(instruction,type)
+    """
+    if instruction!="":
+        print(instruction,type)
+        """
     execute_instruction(instruction,type)
