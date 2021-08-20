@@ -151,12 +151,21 @@ def execute_instruction(instruction,type):
         elif instruction[0]=="cmp":
             1
             if a==b:
-                1
+                Registers["FLAGS"] = Registers["FLAGS"][0:14] + "1"
+            elif a>b:
+                Registers["FLAGS"] = Registers["FLAGS"][0:13] + "1" + Registers["FLAGS"][15]
+            else:
+                Registers["FLAGS"] = Registers["FLAGS"][0:12] + "1" + Registers["FLAGS"][14:]
+
         elif instruction[0]=="mov":
             Registers[instruction[1]] = Registers[instruction[2]]
 
     elif type=="D":
-        1
+        if instruction[0] == "ld":
+            temp_mem_addrr = Registers[instruction[2]]
+            Registers[instruction[1]] = format(temp_mem_addrr, '08b')
+        elif instruction[0] == "str":
+            mem_add[format(int(Registers[instruction[2]],2), '08b')] = Registers[instruction[1]]
     elif type=="E":
         1
     else:
