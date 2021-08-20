@@ -162,10 +162,9 @@ def execute_instruction(instruction,type):
 
     elif type=="D":
         if instruction[0] == "ld":
-            temp_mem_addrr = Registers[instruction[2]]
-            Registers[instruction[1]] = format(temp_mem_addrr, '08b')
+            Registers[instruction[1]] = Registers[instruction[2]]
         elif instruction[0] == "str":
-            mem_add[format(int(Registers[instruction[2]],2), '08b')] = Registers[instruction[1]]
+            mem_add[int(Registers[instruction[2]],2)] = Registers[instruction[1]]
     elif type=="E":
         1
     else:
