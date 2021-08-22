@@ -81,7 +81,7 @@ def fetch_instruction(type,inst_name,bin_inst,i):
   
 
 
-def execute_instruction(instruction,type,pc):
+def execute_instruction(instruction,type,pc,mem):
     instruction=instruction.split(" ")
 
 #add your codes here
@@ -168,14 +168,14 @@ def execute_instruction(instruction,type,pc):
     elif type=="D":
         if instruction[0] == "ld":
             Registers[instruction[1]] = Registers[instruction[2]]
-        elif instruction[0] == "str":
-            mem_add[int(Registers[instruction[2]],2)] = Registers[instruction[1]]
+        elif instruction[0] == "st":
+            mem[int(Registers[instruction[2]],2)] = Registers[instruction[1]]
         reset_flag()
 
     elif type=="E":
         if instruction[0]=="jgt":
             if Registers["FLAGS"][-2]=="1":
-                mem=instruction[1]
+                
                 pc= int(instruction[1])
                 reset_flag()
                 return pc
@@ -261,7 +261,7 @@ while (not Halted) : #fetching each instruction from the memory
     if len(mem_add[pc])>1:
         type=mem_add[pc][1]
 
-    i=execute_instruction(instruction,type,pc) 
+    i=execute_instruction(instruction,type,pc,mem) 
     #execute each instruction 
     
     print((format(pc, '08b')),end=" ")
