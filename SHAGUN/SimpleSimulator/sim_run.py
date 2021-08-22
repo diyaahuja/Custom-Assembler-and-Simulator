@@ -1,5 +1,4 @@
 
-
 Bin_reg = {"R0":"000", "R1":"001", "R2":"010", "R3":"011", "R4": "100", "R5": "101", "R6":"110","FLAGS":"111"}  
 valid_label_names=["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","_","1","2","3","4","5","6","7","8","9","0",":"]
 
@@ -244,12 +243,12 @@ while (not Halted) : #fetching each instruction from the memory
     i=execute_instruction(instruction,type,pc) 
     #execute each instruction 
     
-    print(k,(format(pc, '08b')),Registers["R0"],Registers["R1"],Registers["R2"],Registers["R3"],Registers["R4"],Registers["R5"],Registers["R6"],Registers["FLAGS"])
+    print((format(pc, '08b')),Registers["R0"],Registers["R1"],Registers["R2"],Registers["R3"],Registers["R4"],Registers["R5"],Registers["R6"],Registers["FLAGS"])
     #register dump
 
     pc=i # updated program counter
     k+=1  #k is just printing line no
     
 for i in mem:
-    print(k,i) 
+    print(i) 
     k+=1 
