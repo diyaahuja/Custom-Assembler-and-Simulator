@@ -135,9 +135,35 @@ def execute_instruction(instruction,type,pc):
             #print(Registers)
 
     elif type=="C":
-        1
+        a=int(Registers[instruction[1]],2)
+        b=int(Registers[instruction[2]],2)
+        if instruction[0]=="div":
+            c = a/b
+            d = a%b
+            Registers["R0"] = format(c, '08b')
+            Registers["R1"] = format(d, '08b')
+
+        elif instruction[0]=="not":
+            c = ~b
+            c = format(c, '08b')
+            Registers[instruction[1]] = c
+        elif instruction[0]=="cmp":
+            1
+            if a==b:
+                Registers["FLAGS"] = Registers["FLAGS"][0:14] + "1"
+            elif a>b:
+                Registers["FLAGS"] = Registers["FLAGS"][0:13] + "1" + Registers["FLAGS"][15]
+            else:
+                Registers["FLAGS"] = Registers["FLAGS"][0:12] + "1" + Registers["FLAGS"][14:]
+
+        elif instruction[0]=="mov":
+            Registers[instruction[1]] = Registers[instruction[2]]
+
     elif type=="D":
-        1
+        if instruction[0] == "ld":
+            Registers[instruction[1]] = Registers[instruction[2]]
+        elif instruction[0] == "str":
+            mem_add[int(Registers[instruction[2]],2)] = Registers[instruction[1]]
     elif type=="E":
         if instruction[0]=="jgt":
             if Registers["FLAGS"][-2]=="1":
