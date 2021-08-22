@@ -15,11 +15,11 @@ mem_add=[None]*256
 Registers = {"R0":"0000000000000000", "R1":"0000000000000000", "R2":"0000000000000000", "R3":"0000000000000000",
  "R4": "0000000000000000", "R5": "0000000000000000", "R6":"0000000000000000","FLAGS":"0000000000000000"}
 
-Halted=False
-i=0
+
+
 k=1
 pc=0 #program counter
-
+mem=["0"*16]*256 #mem to be dumped
 def Immediate(n):
     n=int(n)
     Bin=""
@@ -50,7 +50,6 @@ def findregister(register): #finds  register
             return key
 
 def fetch_instruction(type,inst_name,bin_inst,i):
-    global k
     instruction=""
     if type=="A":
         r1=findregister(bin_inst[7:10])
@@ -83,7 +82,7 @@ def fetch_instruction(type,inst_name,bin_inst,i):
   
 
 
-def execute_instruction(instruction,type):
+def execute_instruction(instruction,type,pc):
     instruction=instruction.split(" ")
 
 #add your codes here
@@ -140,16 +139,37 @@ def execute_instruction(instruction,type):
     elif type=="D":
         1
     elif type=="E":
-        1
-    else:
-        1
+        if instruction[0]=="jgt":
+            if Registers["FLAGS"][-2]=="1":
+                mem=instruction[1]
+                pc= int(instruction[1])
+                return pc
+        elif instruction[0]=="jlt":
+            if Registers["FLAGS"][-3]=="1":
+                pc=int(instruction[1])
+                return pc
+
+        elif instruction[0]=="jmp":
+            pc=int(instruction[1])
+            return pc
+
+        elif instruction[0]=="je":
+            if Registers["FLAGS"][-1]=="1":
+                pc=int(instruction[1])
+                return pc
+        else:
+            1
+
+    return (pc+1) 
     
 
-
-
+i=0
+Halted=False
+k=1
 """driver prt of function """
-while(i!=256):
+while(not Halted):
     bin_inst=input()
+    mem[i]=(bin_inst)
     if(bin_inst=="1001100000000000"):
         mem_add[i]=["hlt"]
         Halted=True
@@ -183,15 +203,27 @@ while(i!=256):
     fetch_instruction(type,inst_name,bin_inst,i)
     i+=1
 
-for i in mem_add:
+pc=0
+Halted=False
+while (not Halted) : #fetching each instruction from the memory
+    
     type=""
     instruction=""
-    if i:
-        instruction=i[0]
-        if len(i)>1:
-            type=i[1]
-    """
-    if instruction!="":
-        print(instruction,type)
-        """
-    execute_instruction(instruction,type)
+    if mem_add[pc]==["hlt"]:
+        Halted=True
+    instruction=mem_add[pc][0]
+    if len(mem_add[pc])>1:
+        type=mem_add[pc][1]
+
+    i=execute_instruction(instruction,type,pc) 
+    #execute each instruction 
+    
+    print(k,(format(pc, '08b')),Registers["R0"],Registers["R1"],Registers["R2"],Registers["R3"],Registers["R4"],Registers["R5"],Registers["R6"],Registers["FLAGS"])
+    #register dump
+
+    pc=i # updated program counter
+    k+=1  #k is just printing line no
+    
+for i in mem:
+    print(k,i) 
+    k+=1 
