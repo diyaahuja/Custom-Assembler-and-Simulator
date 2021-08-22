@@ -117,10 +117,13 @@ def execute_instruction(instruction,type,pc):
             #print(Registers)
         elif instruction[0]=="xor":
             Registers[instruction[1]]=Immediate(a^b)
+            reset_flag()
         elif instruction[0]=="or":
             Registers[instruction[1]]=Immediate(a|b)
+            reset_flag()
         elif instruction[0]=="and":
             Registers[instruction[1]]=Immediate(a&b)
+            reset_flag()
 
     elif type=="B":
         if instruction[0]=="mov":
@@ -132,6 +135,7 @@ def execute_instruction(instruction,type,pc):
         elif instruction[0]=="rs":
             Registers[instruction[1]]=right_shift(Registers[instruction[1]],instruction[2])
             #print(Registers)
+        reset_flag()
 
     elif type=="C":
         a=int(Registers[instruction[1]],2)
@@ -141,47 +145,62 @@ def execute_instruction(instruction,type,pc):
             d = a%b
             Registers["R0"] = format(c, '08b')
             Registers["R1"] = format(d, '08b')
-
+            reset_flag()
         elif instruction[0]=="not":
             c = ~b
             c = format(c, '08b')
             Registers[instruction[1]] = c
+            reset_flag()
         elif instruction[0]=="cmp":
-            1
+            
             if a==b:
-                Registers["FLAGS"] = Registers["FLAGS"][0:14] + "1"
+                Registers["FLAGS"] = Registers["FLAGS"][0:15] + "1"
             elif a>b:
-                Registers["FLAGS"] = Registers["FLAGS"][0:13] + "1" + Registers["FLAGS"][15]
+                Registers["FLAGS"] = Registers["FLAGS"][0:14] + "1" + Registers["FLAGS"][15]
             else:
-                Registers["FLAGS"] = Registers["FLAGS"][0:12] + "1" + Registers["FLAGS"][14:]
+                Registers["FLAGS"] = Registers["FLAGS"][0:13] + "1" + Registers["FLAGS"][14:]
+            
 
         elif instruction[0]=="mov":
             Registers[instruction[1]] = Registers[instruction[2]]
+            reset_flag()
 
     elif type=="D":
         if instruction[0] == "ld":
             Registers[instruction[1]] = Registers[instruction[2]]
         elif instruction[0] == "str":
             mem_add[int(Registers[instruction[2]],2)] = Registers[instruction[1]]
+        reset_flag()
+
     elif type=="E":
         if instruction[0]=="jgt":
             if Registers["FLAGS"][-2]=="1":
                 mem=instruction[1]
                 pc= int(instruction[1])
+                reset_flag()
                 return pc
+            reset_flag()
+
         elif instruction[0]=="jlt":
             if Registers["FLAGS"][-3]=="1":
                 pc=int(instruction[1])
+                reset_flag()
                 return pc
+            reset_flag()
 
         elif instruction[0]=="jmp":
             pc=int(instruction[1])
+            reset_flag()
             return pc
-
+            
         elif instruction[0]=="je":
             if Registers["FLAGS"][-1]=="1":
                 pc=int(instruction[1])
+                reset_flag()
                 return pc
+            
+            reset_flag()
+
         else:
             1
 
@@ -191,6 +210,7 @@ def execute_instruction(instruction,type,pc):
 i=0
 Halted=False
 k=1
+
 """driver prt of function """
 while(not Halted):
     bin_inst=input()
@@ -227,7 +247,8 @@ while(not Halted):
             inst_name=key
     fetch_instruction(type,inst_name,bin_inst,i)
     i+=1
-
+def reset_flag():
+    Registers["FLAGS"]="0"*16
 pc=0
 Halted=False
 while (not Halted) : #fetching each instruction from the memory
@@ -243,7 +264,9 @@ while (not Halted) : #fetching each instruction from the memory
     i=execute_instruction(instruction,type,pc) 
     #execute each instruction 
     
-    print((format(pc, '08b')),Registers["R0"],Registers["R1"],Registers["R2"],Registers["R3"],Registers["R4"],Registers["R5"],Registers["R6"],Registers["FLAGS"])
+    print((format(pc, '08b')),end=" ")
+    print(Registers["R0"],Registers["R1"],Registers["R2"],Registers["R3"],Registers["R4"],Registers["R5"],Registers["R6"],end=" ")
+    print(Registers["FLAGS"])
     #register dump
 
     pc=i # updated program counter
