@@ -71,7 +71,7 @@ def fetch_instruction(type,inst_name,bin_inst,i):
         r1=findregister(bin_inst[5:8])
         mem=int(bin_inst[8:],2)
         mem_add[mem]=["var "+"x"]
-        instruction=inst_name+" "+r1+" "+ "variable at mem add " +str(mem)  #X is just dummy variable, go to mem_add using mem 
+        instruction=inst_name+" "+r1+" " +str(mem)  #X is just dummy variable, go to mem_add using mem 
         #print(instruction)
     elif type=="E":
         mem=int(bin_inst[8:],2) #mem is the memory address of that instruction
@@ -81,9 +81,9 @@ def fetch_instruction(type,inst_name,bin_inst,i):
   
 
 
-def execute_instruction(instruction,type,pc,mem):
+def execute_instruction(instruction,type,pc):
     instruction=instruction.split(" ")
-
+    global mem
 #add your codes here
 
     if type=="A": 
@@ -167,15 +167,14 @@ def execute_instruction(instruction,type,pc,mem):
 
     elif type=="D":
         if instruction[0] == "ld":
-            Registers[instruction[1]] = Registers[instruction[2]]
+            Registers[instruction[1]] = mem[int(instruction[2])]
         elif instruction[0] == "st":
-            mem[int(Registers[instruction[2]],2)] = Registers[instruction[1]]
+            mem[int(instruction[2])] = Registers[instruction[1]]
         reset_flag()
 
     elif type=="E":
         if instruction[0]=="jgt":
             if Registers["FLAGS"][-2]=="1":
-                
                 pc= int(instruction[1])
                 reset_flag()
                 return pc
@@ -261,7 +260,7 @@ while (not Halted) : #fetching each instruction from the memory
     if len(mem_add[pc])>1:
         type=mem_add[pc][1]
 
-    i=execute_instruction(instruction,type,pc,mem) 
+    i=execute_instruction(instruction,type,pc) 
     #execute each instruction 
     
     print((format(pc, '08b')),end=" ")
