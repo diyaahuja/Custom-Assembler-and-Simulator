@@ -1,5 +1,4 @@
 
-
 Bin_reg = {"R0":"000", "R1":"001", "R2":"010", "R3":"011", "R4": "100", "R5": "101", "R6":"110","FLAGS":"111"}  
 valid_label_names=["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","_","1","2","3","4","5","6","7","8","9","0",":"]
 
@@ -15,11 +14,11 @@ mem_add=[None]*256
 Registers = {"R0":"0000000000000000", "R1":"0000000000000000", "R2":"0000000000000000", "R3":"0000000000000000",
  "R4": "0000000000000000", "R5": "0000000000000000", "R6":"0000000000000000","FLAGS":"0000000000000000"}
 
-Halted=False
-i=0
+
+
 k=1
 pc=0 #program counter
-
+mem=["0"*16]*256 #mem to be dumped
 def Immediate(n):
     n=int(n)
     Bin=""
@@ -50,7 +49,6 @@ def findregister(register): #finds  register
             return key
 
 def fetch_instruction(type,inst_name,bin_inst,i):
-    global k
     instruction=""
     if type=="A":
         r1=findregister(bin_inst[7:10])
@@ -73,7 +71,7 @@ def fetch_instruction(type,inst_name,bin_inst,i):
         r1=findregister(bin_inst[5:8])
         mem=int(bin_inst[8:],2)
         mem_add[mem]=["var "+"x"]
-        instruction=inst_name+" "+r1+" "+ "variable at mem add " +str(mem)  #X is just dummy variable, go to mem_add using mem 
+        instruction=inst_name+" "+r1+" " +str(mem)  #X is just dummy variable, go to mem_add using mem 
         #print(instruction)
     elif type=="E":
         mem=int(bin_inst[8:],2) #mem is the memory address of that instruction
@@ -83,9 +81,9 @@ def fetch_instruction(type,inst_name,bin_inst,i):
   
 
 
-def execute_instruction(instruction,type):
+def execute_instruction(instruction,type,pc):
     instruction=instruction.split(" ")
-
+    global mem
 #add your codes here
 
     if type=="A": 
@@ -119,10 +117,13 @@ def execute_instruction(instruction,type):
             #print(Registers)
         elif instruction[0]=="xor":
             Registers[instruction[1]]=Immediate(a^b)
+            reset_flag()
         elif instruction[0]=="or":
             Registers[instruction[1]]=Immediate(a|b)
+            reset_flag()
         elif instruction[0]=="and":
             Registers[instruction[1]]=Immediate(a&b)
+            reset_flag()
 
     elif type=="B":
         if instruction[0]=="mov":
@@ -134,22 +135,85 @@ def execute_instruction(instruction,type):
         elif instruction[0]=="rs":
             Registers[instruction[1]]=right_shift(Registers[instruction[1]],instruction[2])
             #print(Registers)
+        reset_flag()
 
     elif type=="C":
-        1
+        a=int(Registers[instruction[1]],2)
+        b=int(Registers[instruction[2]],2)
+        if instruction[0]=="div":
+            c = a/b
+            d = a%b
+            Registers["R0"] = format(c, '08b')
+            Registers["R1"] = format(d, '08b')
+            reset_flag()
+        elif instruction[0]=="not":
+            c = ~b
+            c = format(c, '08b')
+            Registers[instruction[1]] = c
+            reset_flag()
+        elif instruction[0]=="cmp":
+            
+            if a==b:
+                Registers["FLAGS"] = Registers["FLAGS"][0:15] + "1"
+            elif a>b:
+                Registers["FLAGS"] = Registers["FLAGS"][0:14] + "1" + Registers["FLAGS"][15]
+            else:
+                Registers["FLAGS"] = Registers["FLAGS"][0:13] + "1" + Registers["FLAGS"][14:]
+            
+
+        elif instruction[0]=="mov":
+            Registers[instruction[1]] = Registers[instruction[2]]
+            reset_flag()
+
     elif type=="D":
-        1
+        if instruction[0] == "ld":
+            Registers[instruction[1]] = mem[int(instruction[2])]
+        elif instruction[0] == "st":
+            mem[int(instruction[2])] = Registers[instruction[1]]
+        reset_flag()
+
     elif type=="E":
-        1
-    else:
-        1
+        if instruction[0]=="jgt":
+            if Registers["FLAGS"][-2]=="1":
+                pc= int(instruction[1])
+                reset_flag()
+                return pc
+            reset_flag()
+
+        elif instruction[0]=="jlt":
+            if Registers["FLAGS"][-3]=="1":
+                pc=int(instruction[1])
+                reset_flag()
+                return pc
+            reset_flag()
+
+        elif instruction[0]=="jmp":
+            pc=int(instruction[1])
+            reset_flag()
+            return pc
+            
+        elif instruction[0]=="je":
+            if Registers["FLAGS"][-1]=="1":
+                pc=int(instruction[1])
+                reset_flag()
+                return pc
+            
+            reset_flag()
+
+        else:
+            1
+
+    return (pc+1) 
     
 
-
+i=0
+Halted=False
+k=1
 
 """driver prt of function """
-while(i!=256):
+while(not Halted):
     bin_inst=input()
+    mem[i]=(bin_inst)
     if(bin_inst=="1001100000000000"):
         mem_add[i]=["hlt"]
         Halted=True
@@ -182,16 +246,31 @@ while(i!=256):
             inst_name=key
     fetch_instruction(type,inst_name,bin_inst,i)
     i+=1
-
-for i in mem_add:
+def reset_flag():
+    Registers["FLAGS"]="0"*16
+pc=0
+Halted=False
+while (not Halted) : #fetching each instruction from the memory
+    
     type=""
     instruction=""
-    if i:
-        instruction=i[0]
-        if len(i)>1:
-            type=i[1]
-    """
-    if instruction!="":
-        print(instruction,type)
-        """
-    execute_instruction(instruction,type)
+    if mem_add[pc]==["hlt"]:
+        Halted=True
+    instruction=mem_add[pc][0]
+    if len(mem_add[pc])>1:
+        type=mem_add[pc][1]
+
+    i=execute_instruction(instruction,type,pc) 
+    #execute each instruction 
+    
+    print((format(pc, '08b')),end=" ")
+    print(Registers["R0"],Registers["R1"],Registers["R2"],Registers["R3"],Registers["R4"],Registers["R5"],Registers["R6"],end=" ")
+    print(Registers["FLAGS"])
+    #register dump
+
+    pc=i # updated program counter
+    k+=1  #k is just printing line no
+    
+for i in mem:
+    print(i) 
+    k+=1 
