@@ -74,7 +74,7 @@ errors={ 1 : "[ERROR] : Typos in instruction name or label name in line {}", 2: 
  6: "[ERROR] : Variables not declared at the beginning",7: "[ERROR] : hlt not being used as the last instruction",
  8: "[ERROR] : Missing hlt instruction",9: "[ERROR] : General Syntax Error in instruction in line {}",
  10:"[ERROR] : Variable name is not valid (must be alphabet or number) in line {}",
- 11: "[ERROR] : Variable used already initialised in memory {}",12: "[ERROR] : immediate value should be an integer in line {}",
+ 11: "[ERROR] : Variable used already initialised in memory {}",14: "[ERROR] : immediate value should be an integer in line {}",
  12: "[ERROR] : Variable name used instead of label name in line {}", 13: "[ERROR] : Label name used instead of variable name in line {}"
        } # add more errors here 
 
@@ -367,8 +367,8 @@ def checkerrors(line):
         return error_flag_2
     
     if check_imm(line):
-        print(errors[12].format(line_no))
-        file_object.write(errors[12].format(line_no))
+        print(errors[14].format(line_no))
+        file_object.write(errors[14].format(line_no))
         error_flag_2=True
         return error_flag_2
 
